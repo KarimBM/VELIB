@@ -1,0 +1,312 @@
+Récupérer une clé API pour les vélib: 
+https://developer.jcdecaux.com/#/opendata/vls?page=getstarted
+
+Récupérer une clé API pour google maps:
+https://developers.google.com/maps/documentation/javascript/get-api-key?hl=Fr#key
+
+<script>
+
+//main.js
+
+'use strict';
+
+var map;
+var marker;
+
+//Fonction callback a un paramètre
+function getPosition(position)
+{
+	
+    console.log(position.coords.latitude);
+    console.log(position.coords.longitude);
+    
+    //Mise à jour de la carte
+    map.setCenter({
+    
+    	lat: position.coords.latitude,
+        lng: position.coords.longitude
+    });
+    
+    //Mise à jour du marqueur "ma position"
+    marker.setPosition(map.getCenter());
+
+}
+
+function initialize()
+{
+	//Création de la carte google
+	map = new google.maps.Map(document.getElementById('map'), {
+    
+    	center: {
+        	lat: 48.8632915, 
+            lng: 2.3243405
+        },
+        zoom: 16
+    
+    });
+    
+    //Géolocalisation
+    if(navigator.geolocation)
+    {
+    	//Récupération de la position dans une fonction callback
+    	navigator.geolocation.getCurrentPosition(getPosition)
+    
+    }
+    
+    //Autocomplete de google
+    
+    //Récupération du champ html
+    var search = document.getElementById('search');
+    
+    //Mise en place de l'autocomplétion des adresses lorsque l'on tape dans le champ
+    new google.maps.places.Autocomplete(search, {
+    	types: ['geocode']
+    });
+    
+    //Création d'un marqueur
+    marker = new google.maps.Marker({
+		map: map,
+		position: map.getCenter(),
+        title: "Ma position",
+        icon: {
+				url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+		}
+	});
+
+}
+
+function getGeocodingResults(results, status)
+{
+	var lat = results[0].geometry.location.lat();
+    var lng = results[0].geometry.location.lng();
+	
+    //Mise à jour de la carte avec les données reçues
+    map.setCenter({
+    
+    	lat: lat,
+        lng: lng
+    
+    });
+    
+    //Mise à jour du marqueur "ma position"
+    marker.setPosition(map.getCenter());
+    
+    //Récupération les informations de l'api velib
+    $.getJSON("https://api.jcdecaux.com/vls/v1/stations/", {
+  		contract : 'paris', 
+  		apiKey : 'Votre API KEY'
+  	}, getStations);
+}
+
+function getStations(stations)
+{
+    
+    //Boucle forEach qui appelle une fonction displayStation pour chaque station
+    stations.forEach(displayStation);
+
+}
+
+function displayStation(station)
+{
+    
+    var stationMarker = new google.maps.Marker({
+    	map: map,
+        position: station.position,
+        title: station.name
+    });
+    
+    var content = '<h1>' + station.name + '</h1><p>Nombre de vélos disponibles: ' + station.available_bikes + '</p>';
+    
+    var infoWindow = new google.maps.InfoWindow({
+    
+    	content: content
+    
+    });
+    
+    stationMarker.addListener('click', function() {
+    	infoWindow.open(map, stationMarker);
+  	});
+
+
+}
+
+function onSearchAddress(event)
+{
+	event.preventDefault();
+    
+    //Récupération de l'adresse
+    var address = $('#search').val();
+    
+    //Création d'un geocoder
+    var geocoder = new google.maps.Geocoder();
+	geocoder.geocode({
+    
+   		address: address
+        
+    }, getGeocodingResults);
+
+}
+
+$(function()
+{
+
+	$('#btn-search').on('click', onSearchAddress);
+	
+
+});
+
+
+
+</script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, shrink-to-fit=no, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Vélib API</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+<body>
+    <section id="content">
+        <header>
+            <h1>Vélib API</h1>
+            <h2>Oh mon vélo, tu es le plus beau des vélos</h2>
+            <form>
+                <button id="btn-geolocation" class="button" title="Se géolocaliser">
+                    <i class="fa fa-map-marker" aria-label="Géolocalisation"></i>
+                </button>
+                <input id="search" type="search" placeholder="Votre adresse" aria-label="Votre adresse">
+                <button id="btn-search" class="button">Rechercher</button>
+            </form>
+        </header>
+        
+        <main role="main">
+            <div id="map"></div>
+        </main>
+    </section>
+
+    <aside>
+        <h3><i class="fa fa-bicycle"></i> Liste des stations Vélib</h3>
+        <ul id="stations-list">
+
+        </ul>
+    </aside>
+
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="js/classes/Velib.js"></script>
+    <script src="js/classes/Map.js"></script>
+    <script src="js/classes/App.js"></script>
+    <script src="js/main.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=kivdhvjkcfyuvbhuib3254rfrv1rf&signed_in=true&libraries=places&callback=initialize"
+        async defer></script>
+
+</body>
+
+</html>
+
+
+<style>
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	background-color: #353634;
+	font-family: sans-serif;
+	color: #95a5a6;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+aside {
+	flex-basis: 30%;
+	order: 1;
+	background-color: #DD6368;
+	color: #bdc3c7;
+	overflow: hidden;
+	height: 100vh;
+	text-align: center;
+}
+
+aside > h3 {
+	font-size: 1.5em;
+	padding: 0.5em;
+}
+
+aside > ul {
+	overflow: auto;
+	height: 90vh;
+}
+
+aside > ul > li > a {
+	text-decoration: none;
+	color: #bdc3c7;
+	font-size: 0.8em;
+}
+
+#content {
+	display: flex;
+	flex-flow: column wrap;
+	order: 2;
+	padding: 0.5em;
+	align-items: center;
+	flex: 1;
+}
+
+#content header {
+	margin: 0 0 2em;
+	text-align: center;
+}
+
+#content header h1 {
+	font-size: 2em;
+	margin: 0 0 .5em;
+}
+
+#content header h2 {
+	font-size: 1.5em;
+	margin: 0 0 .5em;
+}
+
+#content main {
+	display: flex;
+	flex-flow: column wrap;
+	flex: 1;
+}
+
+#map {
+	width: 640px;
+	height: 480px;
+}
+
+.button {
+	border-radius: 40px;
+	padding: 0.25em 1.25em;
+	transition: background-color 0.5s, box-shadow 0.25s;
+	font-weight: bold;
+}
+
+.button:hover {
+    background-color: lightgray;
+    box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.5);
+}
+
+input[type="search"] {
+  	border-radius: 40px;
+  	padding: 0.25em 1.25em;
+}

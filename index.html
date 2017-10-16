@@ -1,0 +1,56 @@
+<!-- AIzaSyAPz2acUxdojAom1yTM0tW7guMp6jC7dmE -->
+<!-- 24f34eb81d66e7da0652637589c70bc1cc58df5c -->
+<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="utf-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, shrink-to-fit=no, initial-scale=1">
+            <meta name="description" content="">
+            <meta name="author" content="">
+            <title>Vélib API</title>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+            <link rel="stylesheet" href="css/main.css">
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+
+
+        </head>
+    <body>
+    <section id="content">
+        <header>
+            <h1>Vélib API</h1>
+            <h2>Oh mon vélo, tu es le plus beau des vélos</h2>
+            <form>
+                <button id="btn-geolocation" class="button" title="Se géolocaliser">
+                    <i class="fa fa-map-marker" aria-label="Géolocalisation"></i>
+                </button>
+                <input id="search" type="search" placeholder="Votre adresse" aria-label="Votre adresse">
+                <button id="btn-search" class="button">Rechercher</button>
+            </form>
+        </header>
+
+        <main role="main">
+            <div id="map"></div>
+        </main>
+    </section>
+
+    <aside>
+        <h3><i class="fa fa-bicycle"></i> Liste des stations Vélib</h3>
+        <ul id="stations-list">
+
+        </ul>
+    </aside>
+
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="js/classes/Velib.js"></script>
+    <script src="js/classes/Map.js"></script>
+    <script src="js/classes/App.js"></script>
+    <script src="js/main.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPz2acUxdojAom1yTM0tW7guMp6jC7dmE &signed_in=true&libraries=places&callback=initialize"
+            async defer></script>
+
+    </body>
+
+</html>
